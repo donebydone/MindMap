@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.react-flow .react-flow__handle {
+	bottom: -10px;
+	@apply rounded-full w-4 h-4;
+}
+
+.react-flow .react-flow__handle.source {
+	@apply bg-white border-4 border-slate-800 rounded-full w-4 h-4;
+	right: -10px
+}
+
+.react-flow .react-flow__handle.target {
+	@apply bg-black w-4 h-4 border-transparent;
+	left: -10px;
+}
