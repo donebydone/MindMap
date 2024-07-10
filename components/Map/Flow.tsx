@@ -2,7 +2,18 @@
 
 import React, { useEffect, useRef, useState, DragEvent, MouseEvent } from 'react';
 import 'reactflow/dist/style.css';
-import ReactFlow, { Background, Controls, MiniMap, addEdge, OnConnect, Node, OnNodesChange, OnEdgesChange } from 'reactflow';
+import ReactFlow, {
+	Background,
+	Controls,
+	MiniMap,
+	OnConnect,
+	Node,
+	OnNodesChange,
+	OnEdgesChange,
+	Edge,
+	ReactFlowInstance,
+	XYPosition,
+} from 'reactflow';
 import useMapStore, { RFState } from '@/stores/mapStore';
 import { shallow } from 'zustand/shallow';
 import { nodeTypes } from '@/data/defaultNodes';
@@ -12,6 +23,7 @@ import TopPanel from './Panel/TopPanel/TopPanel';
 import NodePalette from './NodePalette';
 import { MinusCircleOutlined, FullscreenOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import ContextMenu from './ContextMenu/ContextMenu';
+import { message } from 'antd';
 
 const panOnDrag = [1, 2];
 
@@ -27,6 +39,7 @@ const selector = (state: RFState) => ({
 	onInit: state.onInit,
 	addNode: state.addNode,
 	onConnect: state.onConnect,
+	removeElement: state.removeElement,
 });
 
 const fitViewOptions = {
@@ -53,6 +66,7 @@ function Flow() {
 		onInit,
 		addNode,
 		onConnect,
+		removeElement,
 	} = useMapStore(selector, shallow);
 
 	useEffect(() => {
@@ -96,7 +110,9 @@ function Flow() {
 			return;
 		}
 
-		addNode(data.type, position, data.CommandName);
+		console.log(data);
+
+		addNode(data.type, position, data.commandName, data.CommandType);
 	};
 
 	const onNodeContextMenu = (event: MouseEvent, node: Node) => {
@@ -110,29 +126,86 @@ function Flow() {
 		setShowMenu(false);
 	};
 
+	const addChildNode = (type: string, parentNode: Node, selectValue: string, NodeName: string) => {
+		if (!parentNode) return;
+
+		const parentPosition: XYPosition = parentNode.position;
+		const childPosition: XYPosition = {
+			x: parentPosition.x + 500, // Offset child node to the right
+			y: parentPosition.y + 250,
+		};
+
+		addNode(type, childPosition, NodeName, selectValue, parentNode.id);
+	};
+
 	const handleAddIdea = () => {
-		// Add logic for adding an empty idea
+		if (selectedNode) {
+			addChildNode('topicNode', selectedNode, 'Idea', "Sub Node");
+		}
 	};
 
 	const handleAddContext = () => {
-		// Add logic for adding an empty context
+		if (selectedNode) {
+			addChildNode('topicNode', selectedNode, "Context", "Sub Node");
+		}
 	};
 
 	const handleAddContent = () => {
-		// Add logic for adding an empty content
+		if (selectedNode) {
+			addChildNode('topicNode', selectedNode, "Content", "Sub Node");
+		}
 	};
 
 	const handleDelete = () => {
-		// Add logic for deleting the selected node
+		if (selectedNode) {
+			removeElement(selectedNode.id);
+			setShowMenu(false);
+		}
 	};
 
-	const handleCommand1 = () => {
-		// Add logic for Command1
+	const onWrapperClick = (event: MouseEvent) => {
+		if ((event.target as HTMLElement).classList.contains('react-flow__pane')) {
+			setShowMenu(false);
+		}
 	};
+
+	const handleAddCommands = (type: string, name: string) => {
+		if (name === '') {
+			message.error({
+				content: "Input Command Name"
+			});
+			return;
+		}
+
+		if (type === '') {
+			message.error({
+				content: "Select Node Type"
+			});
+			return;
+		}
+
+		if (type === 'Node type') {
+			message.error({
+				content: "Select Node Type"
+			});
+			return;
+		}
+
+		if (type === 'Edit Node') {
+			message.error({
+				content: "Select Node Type"
+			});
+			return;
+		}
+
+		if (selectedNode) {
+			addChildNode('topicNode', selectedNode, type, name);
+		}
+	}
 
 	return (
 		<>
-			<div className="absolute left-30 top-[150px] w-[280px] h-[400px] z-10">
+			<div className="absolute left-30 top-[150px] w-[280px] z-10">
 				<div className="border-[1px] border-[solid] border-black h-[40px] w-full relative flex justify-center items-center bg-white">
 					<h1>Command Bar</h1>
 					<div className="absolute right-0 top-0 w-[75px] h-full flex justify-between items-center px-[15px]">
@@ -146,7 +219,7 @@ function Flow() {
 				</div>
 				{showCommandBar ? <NodePalette /> : <></>}
 			</div>
-			<div className="w-full h-full bg-slate-100" ref={reactFlowWrapper} onDragOver={onDragOver} onDrop={onDrop}>
+			<div className="w-full h-full bg-slate-100" ref={reactFlowWrapper} onClick={onWrapperClick} onDragOver={onDragOver} onDrop={onDrop}>
 				<ReactFlow
 					onInit={onInit}
 					nodeTypes={nodeTypes}
@@ -159,8 +232,6 @@ function Flow() {
 					selectionOnDrag
 					fitView
 					panOnDrag={panOnDrag}
-					onConnectStart={onConnectStart}
-					onConnectEnd={onConnectEnd}
 					fitViewOptions={fitViewOptions}
 					onConnect={onConnect as OnConnect}
 					onNodeContextMenu={onNodeContextMenu}
@@ -180,7 +251,7 @@ function Flow() {
 						onAddContext={handleAddContext}
 						onAddContent={handleAddContent}
 						onDelete={handleDelete}
-						onCommand1={handleCommand1}
+						onAddCommand={handleAddCommands}
 					/>
 				)}
 			</div>

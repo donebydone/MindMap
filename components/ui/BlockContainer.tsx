@@ -12,7 +12,7 @@ export default function BlockContainer({ children, onRemove, menu }: BlockContai
 		<div className='group py-1 px-2 rounded w-60 relative '>
 			{onRemove && (
 				<div
-					className='hidden group-hover:block absolute -top-4 -right-2 rounded z-10 border-2 border-slate-700'
+					className='hidden absolute -top-4 -right-2 rounded z-10 border-2 border-slate-700'
 					onClick={() => onRemove()}
 				>
 					<div className='p-1 bg-red-200 text-gray-700'>

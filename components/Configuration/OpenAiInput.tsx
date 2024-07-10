@@ -1,3 +1,5 @@
+// components/Configuration/OpenAiInput.tsx
+
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -7,10 +9,10 @@ import { createNewCommand, getRequest, saveDefaultAssistant, saveDefaultThreadID
 
 interface StoredRequest {
     configuration: {
-        OpenAIContent: string;
-        DefaultAssistantContent: string;
-        DefaultThreadIDContent: string;
-        Commands?: number[];
+        openAIContent: string;
+        defaultAssistantContent: string;
+        defaultThreadIDContent: string;
+        commands?: number[];
     };
 }
 
@@ -20,6 +22,24 @@ export default function OpenAIInput() {
     const [defaultAssistantID, setDefaultAssistantID] = useState<string>('');
     const [defaultThreadID, setDefaultThreadID] = useState<string>('');
     const [isClient, setIsClient] = useState<boolean>(false);
+
+    const fetchStoredRequest = () => {
+        const storedRequest = getRequest() as StoredRequest[];
+
+        console.log(storedRequest);
+
+        if (storedRequest && storedRequest.length > 0) {
+            const firstRequest = storedRequest[0];
+
+            if (!firstRequest.configuration.commands) {
+                addComponent();
+            }
+            setOpenAI(firstRequest.configuration.openAIContent);
+            setDefaultAssistantID(firstRequest.configuration.defaultAssistantContent);
+            setDefaultThreadID(firstRequest.configuration.defaultThreadIDContent);
+            setComponents(firstRequest.configuration.commands || [0]);
+        }
+    };
 
     const addComponent = () => {
         setComponents((prevComponents) => [...prevComponents, prevComponents.length]);
@@ -31,21 +51,17 @@ export default function OpenAIInput() {
     };
 
     useEffect(() => {
-        const storedRequest = getRequest() as StoredRequest[];
+        fetchStoredRequest();
 
-        console.log(storedRequest);
+        const handleProjectChanged = () => {
+            fetchStoredRequest();
+        };
 
-        if (storedRequest && storedRequest.length > 0) {
-            const firstRequest = storedRequest[0];
+        window.addEventListener('projectChanged', handleProjectChanged);
 
-            if (!firstRequest.configuration.Commands) {
-                addComponent();
-            }
-            setOpenAI(firstRequest.configuration.OpenAIContent);
-            setDefaultAssistantID(firstRequest.configuration.DefaultAssistantContent);
-            setDefaultThreadID(firstRequest.configuration.DefaultThreadIDContent);
-            setComponents(firstRequest.configuration.Commands || [0]);
-        }
+        return () => {
+            window.removeEventListener('projectChanged', handleProjectChanged);
+        };
     }, []);
 
     useEffect(() => {

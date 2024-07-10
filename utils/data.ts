@@ -98,3 +98,11 @@ export const loadFromMM = async (): Promise<ImportedDataState> => {
 		input.click();
 	});
 };
+
+
+export const ideas = ['Brother', 'Parent'];
+export const defaultIdeasCheckedList = ['Brother', 'Parent'];
+export const context = ['Brother', 'Parent'];
+export const defaultContextCheckedList = ['Brother', 'Parent'];
+export const content = ['Brother', 'Parent'];
+export const defaultContentCheckedList = ['Brother', 'Parent'];
