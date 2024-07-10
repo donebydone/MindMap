@@ -81,10 +81,10 @@ function Flow() {
 			}
 		};
 
-		window.addEventListener('localStorageUpdate', updateLocalStorage);
+		window.addEventListener('projectChanged', updateLocalStorage);
 
 		return () => {
-			window.removeEventListener('localStorageUpdate', updateLocalStorage);
+			window.removeEventListener('projectChanged', updateLocalStorage);
 		};
 	}, []);
 

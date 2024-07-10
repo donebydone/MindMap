@@ -26,8 +26,6 @@ export default function OpenAIInput() {
     const fetchStoredRequest = () => {
         const storedRequest = getRequest() as StoredRequest[];
 
-        console.log(storedRequest);
-
         if (storedRequest && storedRequest.length > 0) {
             const firstRequest = storedRequest[0];
 

@@ -33,7 +33,17 @@ export function Menu() {
 
 	useEffect(() => {
 		fetchStoredOptions();
-	}, [projectName, options]);
+
+		const handleProjectChanged = () => {
+			fetchStoredOptions();
+		};
+
+		window.addEventListener('projectChanged', handleProjectChanged);
+
+		return () => {
+			window.removeEventListener('projectChanged', handleProjectChanged);
+		};
+	}, []);
 
 	const onExport = async () => {
 		try {
@@ -55,8 +65,6 @@ export function Menu() {
 			}
 
 			loadFreemind();
-
-			window.dispatchEvent(new Event('projectChanged'));
 		} catch (error: any) {
 			if (error.name === 'AbortError') {
 				console.log('Load aborted');
@@ -86,7 +94,6 @@ export function Menu() {
 			}
 
 			loadFromStorage();
-			window.dispatchEvent(new Event('projectChanged'));
 		} catch (error: any) {
 			if (error.name === 'AbortError') {
 				console.log('Load aborted');
@@ -112,7 +119,6 @@ export function Menu() {
 			description: `Project ${projectName} has been created and saved.`,
 		});
 		setProjectName('');
-		window.dispatchEvent(new Event('projectChanged'));
 	};
 
 	const handleChange = (value: string) => {
@@ -129,9 +135,6 @@ export function Menu() {
 			}
 		}
 		loadFromStorage();
-
-		// Dispatch a custom event
-		window.dispatchEvent(new Event('projectChanged'));
 	};
 
 	const handleDelete = () => {
@@ -145,7 +148,6 @@ export function Menu() {
 			else {
 				localStorage.setItem('mentalist-data', JSON.stringify(temp));
 				setProjectName('');
-				window.dispatchEvent(new Event('projectChanged'));
 			}
 		}
 	};
