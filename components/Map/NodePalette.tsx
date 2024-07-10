@@ -50,7 +50,7 @@ const NodePalette: React.FC = () => {
         event.dataTransfer.effectAllowed = 'move';
     };
 
-    useEffect(() => {
+    const fetchData = () => {
         const storeData = getRequest();
 
         if (storeData && storeData[0]?.configuration) {
@@ -59,7 +59,17 @@ const NodePalette: React.FC = () => {
         } else {
             setStoredData([]);
         }
-    }, [storedData]);
+    }
+
+    useEffect(() => {
+        fetchData();
+
+        window.addEventListener('projectChanged', fetchData);
+
+        return () => {
+            window.removeEventListener('projectChanged', fetchData);
+        };
+    }, []);
 
     return (
         <div className="p-[15px] border-[1px] border-solid border-black bg-white flex flex-col gap-[15px] overflow-scroll max-h-[180px]">

@@ -23,6 +23,7 @@ export const saveProjectKey = (key: keyof DataState, value: any): void => {
 	data[0][key] = value;
 
 	localStorage.setItem(KEY, JSON.stringify(data));
+	window.dispatchEvent(new Event('projectChanged'));
 };
 
 export const loadMapData = (): ReactFlowJsonObject => {
@@ -146,6 +147,7 @@ export const updateConfig = (key: string, value: any): void => {
 	});
 
 	localStorage.setItem(KEY, JSON.stringify(data));
+	window.dispatchEvent(new Event('projectChanged'));
 };
 
 export const getConfigKey = (key: keyof Config): any => {
@@ -158,6 +160,7 @@ export const restoreProject = (dataState: ImportedDataState): void => {
 	const data = readFullContentArray();
 	data.unshift(dataState); // Pushing the loaded project to the first item
 	localStorage.setItem(KEY, JSON.stringify(data));
+	window.dispatchEvent(new Event('projectChanged'));
 };
 
 const obj = {
@@ -169,6 +172,7 @@ const obj = {
 export const saveLocalConfigKey = (key: keyof typeof obj, value: string): void => {
 	const keyToUse: string = obj[key];
 	localStorage.setItem(keyToUse, value);
+	window.dispatchEvent(new Event('projectChanged'));
 };
 
 export const getLocalConfigKey = (key: keyof typeof obj): string | null => {
@@ -181,6 +185,7 @@ export const saveProjectName = (name: string): void => {
 	if (data.length > 0) {
 		data[0].projectName = name;
 		localStorage.setItem(KEY, JSON.stringify(data));
+		window.dispatchEvent(new Event('projectChanged'));
 	}
 };
 
@@ -192,6 +197,7 @@ export const saveRequest = (requestContent: string): void => {
 		}
 		data[0].configuration.requestContent = requestContent;
 		localStorage.setItem(KEY, JSON.stringify(data));
+		window.dispatchEvent(new Event('projectChanged'));
 	}
 };
 
@@ -203,6 +209,7 @@ export const saveOpenAI = (openAIContent: string): void => {
 		}
 		data[0].configuration.openAIContent = openAIContent;
 		localStorage.setItem(KEY, JSON.stringify(data));
+		window.dispatchEvent(new Event('projectChanged'));
 	}
 };
 
@@ -214,6 +221,7 @@ export const saveDefaultAssistant = (defaultAssistantContent: string): void => {
 		}
 		data[0].configuration.defaultAssistantContent = defaultAssistantContent;
 		localStorage.setItem(KEY, JSON.stringify(data));
+		window.dispatchEvent(new Event('projectChanged'));
 	}
 };
 
@@ -225,6 +233,7 @@ export const saveDefaultThreadID = (defaultThreadIDContent: string): void => {
 		}
 		data[0].configuration.defaultThreadIDContent = defaultThreadIDContent;
 		localStorage.setItem(KEY, JSON.stringify(data));
+		window.dispatchEvent(new Event('projectChanged'));
 	}
 };
 
@@ -260,6 +269,7 @@ export const saveCommands = (
 
 		data[0].configuration.commands[id] = command;
 		localStorage.setItem(KEY, JSON.stringify(data));
+		window.dispatchEvent(new Event('projectChanged'));
 	}
 };
 
@@ -297,6 +307,7 @@ export const createNewCommand = (): void => {
 
 		data[0].configuration.commands.push(command);
 		localStorage.setItem(KEY, JSON.stringify(data));
+		window.dispatchEvent(new Event('projectChanged'));
 	}
 };
 
@@ -305,6 +316,7 @@ export const deleteCommand = (id: number): void => {
 	if (data.length > 0) {
 		data[0].configuration.commands.splice(id, 1);
 		localStorage.setItem(KEY, JSON.stringify(data));
+		window.dispatchEvent(new Event('projectChanged'));
 	}
 };
 
@@ -355,5 +367,6 @@ export const createNewProject = (projectName: string, type: string): DataState =
 	const data = readFullContentArray();
 	data.unshift(newProject);
 	localStorage.setItem(KEY, JSON.stringify(data));
+	window.dispatchEvent(new Event('projectChanged'));
 	return newProject;
 };

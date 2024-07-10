@@ -25,7 +25,6 @@ export default function RequestInstruction() {
     }, []);
 
     useEffect(() => {
-        console.log(isClient);
         if (isClient) {
             saveRequest(request); // Save the request to localStorage whenever it changes
         }
