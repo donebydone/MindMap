@@ -139,9 +139,14 @@ export function Menu() {
 		if (storedOptions) {
 			const temp = JSON.parse(storedOptions) as ProjectOption[];
 			temp.shift();
-			localStorage.setItem('mentalist-data', JSON.stringify(temp));
-			setProjectName('');
-			window.dispatchEvent(new Event('projectChanged'));
+			if (temp.length == 0) {
+				localStorage.removeItem('mentalist-data')
+			}
+			else {
+				localStorage.setItem('mentalist-data', JSON.stringify(temp));
+				setProjectName('');
+				window.dispatchEvent(new Event('projectChanged'));
+			}
 		}
 	};
 
