@@ -9,21 +9,18 @@ import { FullscreenOutlined } from '@ant-design/icons';
 const { Option } = Select;
 const { TextArea } = Input;
 
-const Ideas = ['Brother', 'Parent'];
-const defaultIdeasCheckedList = ['Brother', 'Parent'];
-const Context = ['Brother', 'Parent'];
-const defaultContextCheckedList = ['Brother', 'Parent'];
-const Content = ['Brother', 'Parent'];
-const defaultContentCheckedList = ['Brother', 'Parent'];
+import { ideas, defaultIdeasCheckedList, context, defaultContextCheckedList, content, defaultContentCheckedList } from '@/utils/data';
 
 interface CommandProps {
     id: number;
     onDelete: (id: number) => void;
 }
 
+const defaultValue: string = "Node type";
+
 export default function Command({ id, onDelete }: CommandProps) {
     const [showModal, setShowModal] = useState(false);
-    const [selectedValue, setSelectedValue] = useState('');
+    const [selectedValue, setSelectedValue] = useState<string>(defaultValue);
 
     const [isClient, setIsClient] = useState(false);
 
@@ -31,29 +28,37 @@ export default function Command({ id, onDelete }: CommandProps) {
     const [checkedContextList, setCheckedContextList] = useState<string[]>(defaultContextCheckedList);
     const [checkedContentList, setCheckedContentList] = useState<string[]>(defaultContentCheckedList);
 
-    const [CommandName, setCommandName] = useState('');
-    const [CommandShortcut, setCommandShortcut] = useState('');
-    const [AssistantId, setAssistantId] = useState('');
-    const [ThreadId, setThreadId] = useState('');
-    const [CommandsContent, setCommandsContent] = useState('');
+    const [commandName, setCommandName] = useState('');
+    const [commandShortcut, setCommandShortcut] = useState('');
+    const [assistantId, setAssistantId] = useState('');
+    const [threadId, setThreadId] = useState('');
+    const [commandsContent, setCommandsContent] = useState('');
 
-    const checkIdeasAll = Ideas.length === checkedIdeasList.length;
-    const indeterminateIdeas = checkedIdeasList.length > 0 && checkedIdeasList.length < Ideas.length;
-    const checkContextAll = Context.length === checkedContextList.length;
-    const indeterminateContext = checkedContextList.length > 0 && checkedContextList.length < Context.length;
-    const checkContentAll = Content.length === checkedContentList.length;
-    const indeterminateContent = checkedContentList.length > 0 && checkedContentList.length < Content.length;
+    const checkIdeasAll = ideas.length === checkedIdeasList.length;
+    const indeterminateIdeas = checkedIdeasList.length > 0 && checkedIdeasList.length < ideas.length;
+    const checkContextAll = context.length === checkedContextList.length;
+    const indeterminateContext = checkedContextList.length > 0 && checkedContextList.length < context.length;
+    const checkContentAll = content.length === checkedContentList.length;
+    const indeterminateContent = checkedContentList.length > 0 && checkedContentList.length < content.length;
+
+    const handleOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const value = event.target.value;
+        const customEvent = new CustomEvent('inputChangeEvent', {
+            detail: { value },
+        });
+        window.dispatchEvent(customEvent);
+    };
 
     const onCheckIdeasAllChange: CheckboxProps['onChange'] = (e) => {
-        setCheckedIdeasList(e.target.checked ? Ideas : []);
+        setCheckedIdeasList(e.target.checked ? ideas : []);
     };
 
     const onCheckContextAllChange: CheckboxProps['onChange'] = (e) => {
-        setCheckedContextList(e.target.checked ? Context : []);
+        setCheckedContextList(e.target.checked ? context : []);
     };
 
     const onCheckContentAllChange: CheckboxProps['onChange'] = (e) => {
-        setCheckedContentList(e.target.checked ? Content : []);
+        setCheckedContentList(e.target.checked ? content : []);
     };
 
     const handleChange = (value: string) => {
@@ -67,18 +72,19 @@ export default function Command({ id, onDelete }: CommandProps) {
             setCheckedIdeasList(storedRequest.ideas || defaultIdeasCheckedList);
             setCheckedContextList(storedRequest.context || defaultContextCheckedList);
             setCheckedContentList(storedRequest.content || defaultContentCheckedList);
-            setCommandName(storedRequest.CommandName || '');
-            setCommandShortcut(storedRequest.CommandShortcut || '');
-            setAssistantId(storedRequest.AssistantId || '');
-            setThreadId(storedRequest.ThreadId || '');
-            setCommandsContent(storedRequest.CommandsContent || '');
+            setCommandName(storedRequest.commandName || '');
+            setCommandShortcut(storedRequest.commandShortcut || '');
+            setAssistantId(storedRequest.assistantId || '');
+            setThreadId(storedRequest.threadId || '');
+            setCommandsContent(storedRequest.commands || '');
+            setSelectedValue(storedRequest.selectedValue || defaultValue); // Restore the selected value from storage
         }
     }, [id]);
 
-    const onDragStart = (event: DragEvent, nodeType: string, CommandName: string) => {
+    const onDragStart = (event: DragEvent, nodeType: string, commandName: string) => {
         const data = JSON.stringify({
             type: nodeType,
-            CommandName: CommandName
+            commandName: commandName
         });
         event.dataTransfer.setData('application/reactflow', data);
         event.dataTransfer.effectAllowed = 'move';
@@ -86,14 +92,14 @@ export default function Command({ id, onDelete }: CommandProps) {
 
     useEffect(() => {
         if (isClient) {
-            saveCommands(CommandName, CommandShortcut, AssistantId, ThreadId, selectedValue, checkedIdeasList, checkedContextList, checkedContentList, CommandsContent, id);
+            saveCommands(commandName, commandShortcut, assistantId, threadId, selectedValue, checkedIdeasList, checkedContextList, checkedContentList, commandsContent, id);
         }
-    }, [CommandName, CommandShortcut, AssistantId, ThreadId, CommandsContent, selectedValue, checkedIdeasList, checkedContextList, checkedContentList, id, isClient]);
+    }, [commandName, commandShortcut, assistantId, threadId, commandsContent, selectedValue, checkedIdeasList, checkedContextList, checkedContentList, id, isClient]);
 
     return (
         <div
             className='w-full border-[1px] border-solid border-black px-[70px] py-[25px] flex flex-col gap-[30px] bg-[#f5f5f5] relative'
-            onDragStart={(event) => onDragStart(event, 'topicNode', CommandName)}
+            onDragStart={(event) => onDragStart(event, 'topicNode', commandName)}
             draggable
         >
             <div className='absolute right-[10px] top-[10px]'>
@@ -104,19 +110,19 @@ export default function Command({ id, onDelete }: CommandProps) {
                     <div className='flex flex-col justify-between h-[250px] w-full'>
                         <div className="w-[full] flex justify-between items-center">
                             <h1>Command Name</h1>
-                            <Input placeholder="Input" className='w-[300px]' value={CommandName} onChange={(e) => { setCommandName(e.target.value); setIsClient(true); }} />
+                            <Input placeholder="Input" className='w-[300px]' value={commandName} onChange={(e) => { setCommandName(e.target.value); setIsClient(true); handleOnChange(e) }} />
                         </div>
                         <div className="w-[full] flex justify-between items-center">
                             <h1>Command Shortcut</h1>
-                            <Input placeholder="Input" className='w-[300px]' value={CommandShortcut} onChange={(e) => { setCommandShortcut(e.target.value); setIsClient(true); }} />
+                            <Input placeholder="Input" className='w-[300px]' value={commandShortcut} onChange={(e) => { setCommandShortcut(e.target.value); setIsClient(true); handleOnChange(e) }} />
                         </div>
                         <div className="w-[full] flex justify-between items-center">
                             <h1>Assistant Id</h1>
-                            <Input placeholder="Input" className='w-[300px]' value={AssistantId} onChange={(e) => { setAssistantId(e.target.value); setIsClient(true); }} />
+                            <Input placeholder="Input" className='w-[300px]' value={assistantId} onChange={(e) => { setAssistantId(e.target.value); setIsClient(true); handleOnChange(e) }} />
                         </div>
                         <div className="w-[full] flex justify-between items-center">
                             <h1>Thread Id</h1>
-                            <Input placeholder="Input" className='w-[300px]' value={ThreadId} onChange={(e) => { setThreadId(e.target.value); setIsClient(true); }} />
+                            <Input placeholder="Input" className='w-[300px]' value={threadId} onChange={(e) => { setThreadId(e.target.value); setIsClient(true); handleOnChange(e) }} />
                         </div>
                     </div>
                 </div>
@@ -128,9 +134,9 @@ export default function Command({ id, onDelete }: CommandProps) {
                         defaultValue={selectedValue}
                     >
                         <Option value="Node type">Node type</Option>
-                        <Option value="Create Idea">Create Idea</Option>
-                        <Option value="Create Context">Create Context</Option>
-                        <Option value="Create Content">Create Content</Option>
+                        <Option value="Idea">Create Idea</Option>
+                        <Option value="Context">Create Context</Option>
+                        <Option value="Content">Create Content</Option>
                         <Option value="Edit Node">Edit Node</Option>
                     </Select>
                     <div className='w-[650px] grow border-[#d9d9d9] border-black border-[1px] rounded-[5px] flex flex-col justify-between p-[30px]'>
@@ -142,7 +148,7 @@ export default function Command({ id, onDelete }: CommandProps) {
                         </div>
                         <div className='w-full flex'>
                             <div className='w-[31%] flex items-center justify-center'><h1>Ideas</h1></div>
-                            {Ideas.map(option => (
+                            {ideas.map(option => (
                                 <Checkbox
                                     key={option}
                                     value={option}
@@ -161,7 +167,7 @@ export default function Command({ id, onDelete }: CommandProps) {
                         </div>
                         <div className='w-full flex'>
                             <div className='w-[31%] flex items-center justify-center'><h1>Context</h1></div>
-                            {Context.map(option => (
+                            {context.map(option => (
                                 <Checkbox
                                     key={option}
                                     value={option}
@@ -180,7 +186,7 @@ export default function Command({ id, onDelete }: CommandProps) {
                         </div>
                         <div className='w-full flex'>
                             <div className='w-[31%] flex items-center justify-center'><h1>Content</h1></div>
-                            {Content.map(option => (
+                            {content.map(option => (
                                 <Checkbox
                                     key={option}
                                     value={option}
@@ -201,12 +207,12 @@ export default function Command({ id, onDelete }: CommandProps) {
                 </div>
             </div>
             <div className='w-full flex flex-col gap-[20px]'>
-                <h1>Commands</h1>
+                <h1>commands</h1>
                 <TextArea
                     autoSize={{ minRows: 6, maxRows: 10 }}
                     className="w-full text-[15px] whitespace-pre-line"
                     onChange={(e) => { setCommandsContent(e.target.value); setIsClient(true); }}
-                    value={CommandsContent}
+                    value={commandsContent}
                 />
             </div>
             <div className='w-full flex justify-end relative'>
@@ -214,7 +220,7 @@ export default function Command({ id, onDelete }: CommandProps) {
                     <div className='absolute w-[220px] h-[150px] bg-[#ffffff] bottom-[20px] right-[50px] z-10 border-[1px] border-black border-solid rounded-[3px] px-[20px] py-[22px] flex flex-col justify-between'>
                         <h1 className='text-[18px]'>You are going to<br />Delete a Command</h1>
                         <div className='flex justify-between items-center'>
-                            <Button style={{ backgroundColor: "white", color: 'black', border: "1px solid #000000", width: "74px" }} onClick={() => { onDelete(id); deleteCommand(id) }}>OK</Button>
+                            <Button style={{ backgroundColor: "white", color: 'black', border: "1px solid #000000", width: "74px" }} onClick={() => { onDelete(id); deleteCommand(id); setShowModal(false) }}>OK</Button>
                             <Button style={{ backgroundColor: "#212121", color: "#ffffff", width: "74px" }} onClick={() => setShowModal(false)}>Cancel</Button>
                         </div>
                     </div>

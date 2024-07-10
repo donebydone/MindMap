@@ -14,12 +14,9 @@ export default function RequestInstruction() {
 
     useEffect(() => {
         const storedRequest = getRequest();
-        console.log(storedRequest);
         if (storedRequest) {
             if (storedRequest[0].configuration) {
-
-                console.log(storedRequest[0].configuration.RequestContent);
-                setRequest(storedRequest[0].configuration.RequestContent);
+                setRequest(storedRequest[0].configuration.requestContent);
             }
             else {
                 setRequest('');

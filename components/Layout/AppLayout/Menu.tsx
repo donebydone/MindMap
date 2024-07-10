@@ -1,12 +1,13 @@
+// components/Layout/AppLayout/Menu.tsx
+
 'use client';
 
 import { actionLoadFileFromDisk, actionSaveFileToDisk, actionSaveProjectFileToDisk, actionLoadProjectFileFromDisk } from '@/actions/export';
 import { useToast } from '@/hooks/use-toast';
 import useMapStore from '@/stores/mapStore';
 import { getRequest, saveProjectName } from '@/utils/storage';
-import { useState, useEffect, useRef, ChangeEvent } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import { Input, Select, Button } from 'antd';
-import { useMap } from 'react-use';
 
 const { Option } = Select;
 
@@ -20,16 +21,18 @@ export function Menu() {
 	const loadFreemind = useMapStore((s) => s.loadFreemind);
 	const createInitialNode = useMapStore((s) => s.createInitialNode);
 
-	const abortControllerRef = useRef<AbortController>(new AbortController());
 	const [projectName, setProjectName] = useState<string>('');
 	const [options, setOptions] = useState<ProjectOption[]>([]);
-	const [datas, setDatas] = useState<string>('');
 
-	useEffect(() => {
+	const fetchStoredOptions = () => {
 		const storedOptions = getRequest();
 		if (storedOptions) {
 			setOptions(storedOptions);
 		}
+	};
+
+	useEffect(() => {
+		fetchStoredOptions();
 	}, [projectName, options]);
 
 	const onExport = async () => {
@@ -47,17 +50,13 @@ export function Menu() {
 	const onLoad = async () => {
 		try {
 			const loaded = await actionLoadFileFromDisk();
-
 			if (!loaded) {
 				return;
 			}
 
 			loadFreemind();
 
-			toast({
-				title: 'Map successfully loaded',
-				description: 'Your mind map has been loaded correctly.',
-			});
+			window.dispatchEvent(new Event('projectChanged'));
 		} catch (error: any) {
 			if (error.name === 'AbortError') {
 				console.log('Load aborted');
@@ -82,17 +81,12 @@ export function Menu() {
 	const projectLoad = async () => {
 		try {
 			const loaded = await actionLoadProjectFileFromDisk();
-
 			if (!loaded) {
 				return;
 			}
 
 			loadFromStorage();
-
-			toast({
-				title: 'Project successfully loaded',
-				description: 'Your project has been loaded correctly.',
-			});
+			window.dispatchEvent(new Event('projectChanged'));
 		} catch (error: any) {
 			if (error.name === 'AbortError') {
 				console.log('Load aborted');
@@ -100,6 +94,7 @@ export function Menu() {
 				console.error('Load error:', error);
 			}
 		}
+
 	};
 
 	const onSaveProjectName = () => {
@@ -117,6 +112,7 @@ export function Menu() {
 			description: `Project ${projectName} has been created and saved.`,
 		});
 		setProjectName('');
+		window.dispatchEvent(new Event('projectChanged'));
 	};
 
 	const handleChange = (value: string) => {
@@ -133,6 +129,9 @@ export function Menu() {
 			}
 		}
 		loadFromStorage();
+
+		// Dispatch a custom event
+		window.dispatchEvent(new Event('projectChanged'));
 	};
 
 	const handleDelete = () => {
@@ -142,6 +141,7 @@ export function Menu() {
 			temp.shift();
 			localStorage.setItem('mentalist-data', JSON.stringify(temp));
 			setProjectName('');
+			window.dispatchEvent(new Event('projectChanged'));
 		}
 	};
 

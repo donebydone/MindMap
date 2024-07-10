@@ -18,6 +18,9 @@ export const actionLoadFileFromDisk = async () => {
 	try {
 		const data = await loadFromMM();
 
+		console.log(data, "data");
+
+
 		if (data.config?.palette == null) {
 			data.config = {
 				...data.config,
@@ -25,7 +28,19 @@ export const actionLoadFileFromDisk = async () => {
 			};
 		}
 
-		restoreProject(data);
+		const configuration = {
+			configuration: {
+				requestContent: "",
+				openAIContent: "",
+				defaultAssistantContent: "",
+				defaultThreadIDContent: "",
+				commands: []
+			}
+		}
+
+		const mergeData = { ...configuration, ...data }
+
+		restoreProject(mergeData);
 
 		return true;
 	} catch (error) {

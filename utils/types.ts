@@ -6,6 +6,8 @@ export interface DataState {
 	version: string;
 	map: MapState;
 	config?: Config;
+	configuration: Config;
+	projectName: string;
 }
 
 export interface ExportedDataState {
@@ -75,9 +77,9 @@ export interface PaletteElement {
 	};
 }
 
-export interface PaletteElementNodeStyles extends CSSProperties {}
+export interface PaletteElementNodeStyles extends CSSProperties { }
 
-export interface PaletteElementEdgeStyles extends CSSProperties {}
+export interface PaletteElementEdgeStyles extends CSSProperties { }
 
 export interface Config {
 	palette?: string;
