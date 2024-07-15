@@ -1,6 +1,8 @@
+// components/Configuration/Command.tsx
+
 'use client';
 
-import React, { useEffect, useState, DragEvent } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Input, Select, Checkbox } from 'antd';
 import type { CheckboxProps } from 'antd';
 import { deleteCommand, getCommand, saveCommands } from '@/utils/storage';
@@ -14,11 +16,13 @@ import { ideas, defaultIdeasCheckedList, context, defaultContextCheckedList, con
 interface CommandProps {
     id: number;
     onDelete: (id: number) => void;
+    onEdit: (id: number) => void;
+    onApply: (id: number) => void;
 }
 
 const defaultValue: string = "Node type";
 
-export default function Command({ id, onDelete }: CommandProps) {
+export default function Command({ id, onDelete, onEdit, onApply }: CommandProps) {
     const [showModal, setShowModal] = useState(false);
     const [selectedValue, setSelectedValue] = useState<string>(defaultValue);
 
@@ -33,6 +37,8 @@ export default function Command({ id, onDelete }: CommandProps) {
     const [assistantId, setAssistantId] = useState('');
     const [threadId, setThreadId] = useState('');
     const [commandsContent, setCommandsContent] = useState('');
+
+    const [editAble, setEditAble] = useState<boolean>(false);
 
     const checkIdeasAll = ideas.length === checkedIdeasList.length;
     const indeterminateIdeas = checkedIdeasList.length > 0 && checkedIdeasList.length < ideas.length;
@@ -77,18 +83,9 @@ export default function Command({ id, onDelete }: CommandProps) {
             setAssistantId(storedRequest.assistantId || '');
             setThreadId(storedRequest.threadId || '');
             setCommandsContent(storedRequest.commands || '');
-            setSelectedValue(storedRequest.selectedValue || defaultValue); // Restore the selected value from storage
+            setSelectedValue(storedRequest.select || defaultValue); // Restore the selected value from storage
         }
     }, [id]);
-
-    const onDragStart = (event: DragEvent, nodeType: string, commandName: string) => {
-        const data = JSON.stringify({
-            type: nodeType,
-            commandName: commandName
-        });
-        event.dataTransfer.setData('application/reactflow', data);
-        event.dataTransfer.effectAllowed = 'move';
-    };
 
     useEffect(() => {
         if (isClient) {
@@ -98,9 +95,7 @@ export default function Command({ id, onDelete }: CommandProps) {
 
     return (
         <div
-            className='w-full border-[1px] border-solid border-black px-[70px] py-[25px] flex flex-col gap-[30px] bg-[#f5f5f5] relative'
-            onDragStart={(event) => onDragStart(event, 'topicNode', commandName)}
-            draggable
+            className='w-full border-[1px] border-solid border-black px-[70px] py-[25px] flex flex-col gap-[30px] bg-[#f5f5f5] relative mt-[40px]'
         >
             <div className='absolute right-[10px] top-[10px]'>
                 <FullscreenOutlined className='text-[20px]' />
@@ -110,19 +105,19 @@ export default function Command({ id, onDelete }: CommandProps) {
                     <div className='flex flex-col justify-between h-[250px] w-full'>
                         <div className="w-[full] flex justify-between items-center">
                             <h1>Command Name</h1>
-                            <Input placeholder="Input" className='w-[300px]' value={commandName} onChange={(e) => { setCommandName(e.target.value); setIsClient(true); handleOnChange(e) }} />
+                            <Input placeholder="Input" className='w-[300px]' value={commandName} disabled={editAble ? false : true} onChange={(e) => { setCommandName(e.target.value); setIsClient(true); handleOnChange(e) }} />
                         </div>
                         <div className="w-[full] flex justify-between items-center">
                             <h1>Command Shortcut</h1>
-                            <Input placeholder="Input" className='w-[300px]' value={commandShortcut} onChange={(e) => { setCommandShortcut(e.target.value); setIsClient(true); handleOnChange(e) }} />
+                            <Input placeholder="Input" className='w-[300px]' value={commandShortcut} disabled={editAble ? false : true} onChange={(e) => { setCommandShortcut(e.target.value); setIsClient(true); handleOnChange(e) }} />
                         </div>
                         <div className="w-[full] flex justify-between items-center">
                             <h1>Assistant Id</h1>
-                            <Input placeholder="Input" className='w-[300px]' value={assistantId} onChange={(e) => { setAssistantId(e.target.value); setIsClient(true); handleOnChange(e) }} />
+                            <Input placeholder="Input" className='w-[300px]' value={assistantId} disabled={editAble ? false : true} onChange={(e) => { setAssistantId(e.target.value); setIsClient(true); handleOnChange(e) }} />
                         </div>
                         <div className="w-[full] flex justify-between items-center">
                             <h1>Thread Id</h1>
-                            <Input placeholder="Input" className='w-[300px]' value={threadId} onChange={(e) => { setThreadId(e.target.value); setIsClient(true); handleOnChange(e) }} />
+                            <Input placeholder="Input" className='w-[300px]' value={threadId} disabled={editAble ? false : true} onChange={(e) => { setThreadId(e.target.value); setIsClient(true); handleOnChange(e) }} />
                         </div>
                     </div>
                 </div>
@@ -132,6 +127,7 @@ export default function Command({ id, onDelete }: CommandProps) {
                         onChange={(value) => { handleChange(value); setIsClient(true); }}
                         value={selectedValue}
                         defaultValue={selectedValue}
+                        disabled={editAble ? false : true}
                     >
                         <Option value="Node type">Node type</Option>
                         <Option value="Idea">Create Idea</Option>
@@ -161,9 +157,10 @@ export default function Command({ id, onDelete }: CommandProps) {
                                         setIsClient(true);
                                     }}
                                     className="w-[23%] flex justify-center items-center"
+                                    disabled={editAble ? false : true}
                                 />
                             ))}
-                            <Checkbox indeterminate={indeterminateIdeas} onChange={onCheckIdeasAllChange} checked={checkIdeasAll} className="w-[23%] flex justify-center items-center" />
+                            <Checkbox indeterminate={indeterminateIdeas} onChange={onCheckIdeasAllChange} checked={checkIdeasAll} disabled={editAble ? false : true} className="w-[23%] flex justify-center items-center" />
                         </div>
                         <div className='w-full flex'>
                             <div className='w-[31%] flex items-center justify-center'><h1>Context</h1></div>
@@ -179,10 +176,11 @@ export default function Command({ id, onDelete }: CommandProps) {
                                         setCheckedContextList(newList);
                                         setIsClient(true);
                                     }}
+                                    disabled={editAble ? false : true}
                                     className="w-[23%] flex justify-center items-center"
                                 />
                             ))}
-                            <Checkbox indeterminate={indeterminateContext} onChange={onCheckContextAllChange} checked={checkContextAll} className="w-[23%] flex justify-center items-center" />
+                            <Checkbox indeterminate={indeterminateContext} disabled={editAble ? false : true} onChange={onCheckContextAllChange} checked={checkContextAll} className="w-[23%] flex justify-center items-center" />
                         </div>
                         <div className='w-full flex'>
                             <div className='w-[31%] flex items-center justify-center'><h1>Content</h1></div>
@@ -198,10 +196,11 @@ export default function Command({ id, onDelete }: CommandProps) {
                                         setCheckedContentList(newList);
                                         setIsClient(true);
                                     }}
+                                    disabled={editAble ? false : true}
                                     className="w-[23%] flex justify-center items-center"
                                 />
                             ))}
-                            <Checkbox indeterminate={indeterminateContent} onChange={onCheckContentAllChange} checked={checkContentAll} className="w-[23%] flex justify-center items-center" />
+                            <Checkbox indeterminate={indeterminateContent} disabled={editAble ? false : true} onChange={onCheckContentAllChange} checked={checkContentAll} className="w-[23%] flex justify-center items-center" />
                         </div>
                     </div>
                 </div>
@@ -213,6 +212,7 @@ export default function Command({ id, onDelete }: CommandProps) {
                     className="w-full text-[15px] whitespace-pre-line"
                     onChange={(e) => { setCommandsContent(e.target.value); setIsClient(true); }}
                     value={commandsContent}
+                    disabled={editAble ? false : true}
                 />
             </div>
             <div className='w-full flex justify-end relative'>
@@ -225,7 +225,15 @@ export default function Command({ id, onDelete }: CommandProps) {
                         </div>
                     </div>
                 )}
-                <Button style={{ backgroundColor: "#212121", color: "#ffffff" }} onClick={() => { setShowModal(true) }}>Delete</Button>
+                <div className='flex gap-[15px]'>
+                    {
+                        editAble ?
+                            <Button style={{ backgroundColor: "#1677ff", color: "#ffffff", width: "75px" }} onClick={() => { setEditAble(false); onApply(id); }}>Apply</Button>
+                            :
+                            <Button style={{ backgroundColor: "#1677ff", color: "#ffffff", width: "75px" }} onClick={() => { setEditAble(true); onEdit(id); }}>Edit</Button>
+                    }
+                    <Button style={{ backgroundColor: "#212121", color: "#ffffff", width: "75px" }} onClick={() => { setShowModal(true) }}>Delete</Button>
+                </div>
             </div>
         </div>
     );

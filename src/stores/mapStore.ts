@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { createWithEqualityFn } from 'zustand/traditional';
 import {
 	applyEdgeChanges,
 	applyNodeChanges,
@@ -21,11 +22,23 @@ import { MouseEvent as ReactMouseEvent, RefObject, TouchEvent as ReactTouchEvent
 import { SUBTOPIC } from '@/utils/constants/headerTypes';
 import { nextId } from '@/utils/id';
 import { getConfigKey, loadMapData, updateConfig, saveProjectKey, createNewProject } from '@/utils/storage';
-import { PaletteElement } from '@/utils/types';
+import { PaletteElement, ReturnCommand } from '@/utils/types';
 import { palettes } from '@/data/defaultPalettes';
 
 type ColorMap = {
 	[key: string]: string;
+};
+
+export const defaultReturnCommand: ReturnCommand = {
+	commandName: '',
+	commandShortcut: '',
+	assistantId: '',
+	threadId: '',
+	commands: '',
+	select: '',
+	ideas: [],
+	context: [],
+	content: []
 };
 
 export type RFState = {
@@ -50,7 +63,7 @@ export type RFState = {
 	onEdgesChange: OnEdgesChange;
 	onConnectStart: (event: ReactMouseEvent | ReactTouchEvent, params: OnConnectStartParams) => void;
 	onConnectEnd: (event: MouseEvent | TouchEvent) => void;
-	onConnect: OnConnect;
+	onConnect: ({ source, target }: { source: string, target: string }) => void;
 	updateText: (nodeId: string, text: string) => void;
 	updateInnerType: (nodeId: string, text: string) => void;
 	addChildrenNodes: (nodeId: string, type: string, data: Array<any>) => void;
@@ -61,7 +74,7 @@ export type RFState = {
 	addNode: (type: string, position: { x: number, y: number }, text: string, nodeCategory: string, parentId?: string) => void;
 };
 
-const useMapStore = create<RFState>((set, get) => ({
+const useMapStore = createWithEqualityFn<RFState>((set, get) => ({
 	instance: null,
 	onInit: (instance: ReactFlowInstance) => {
 		set({
@@ -210,12 +223,17 @@ const useMapStore = create<RFState>((set, get) => ({
 			get().applyPalette(selectedPalette);
 		}
 	},
-	onConnect: ({ source, target }) => {
+	onConnect: ({ source, target }: { source: string, target: string }) => {
 		const { nodes, edges } = get();
 
 		const targetNode = nodes.find(node => node.id === target);
 		if (targetNode?.data?.parentId) {
 			console.warn(`Node ${target} already has a parent.`);
+			return;
+		}
+
+		if (!source || !target) {
+			console.error('Source or target is null or undefined');
 			return;
 		}
 
@@ -407,13 +425,13 @@ const useMapStore = create<RFState>((set, get) => ({
 
 		if (nodeCategory === 'Idea') {
 			newNode = {
-				id,
+				id: `IDEA_#${id}`,
 				type: type,
 				position,
 				data: { type: "2", text: text },
 				style: {
-					backgroundColor: "#f72585",
-					borderColor: "#f72585",
+					backgroundColor: "Green",
+					borderColor: "Green",
 					borderRadius: "10px",
 					borderStyle: "solid",
 					borderWidth: 1,
@@ -422,13 +440,13 @@ const useMapStore = create<RFState>((set, get) => ({
 			};
 		} else if (nodeCategory === "Context") {
 			newNode = {
-				id,
+				id: `CONTEXT_#${id}`,
 				type: type,
 				position,
 				data: { type: "context", text: text },
 				style: {
-					backgroundColor: "#7209b7",
-					borderColor: "#7209b7",
+					backgroundColor: "Gray",
+					borderColor: "Gray",
 					borderRadius: "10px",
 					borderStyle: "solid",
 					borderWidth: 1,
@@ -437,17 +455,17 @@ const useMapStore = create<RFState>((set, get) => ({
 			};
 		} else {
 			newNode = {
-				id,
+				id: `CONTENT_#${id}`,
 				type: type,
 				position,
 				data: { type: "other", text: text },
 				style: {
-					backgroundColor: "#4361ee",
-					borderColor: "#4361ee",
+					backgroundColor: "White",
+					borderColor: "Gray",
 					borderRadius: "10px",
 					borderStyle: "solid",
 					borderWidth: 1,
-					color: "#ffffff",
+					color: "#000000",
 				}
 			};
 		}
@@ -457,18 +475,48 @@ const useMapStore = create<RFState>((set, get) => ({
 		});
 
 		if (parentId) {
-			const newEdge: Edge = {
-				id: `e${parentId}-${id}`,
-				source: parentId,
-				target: id,
-				style: {
-					stroke: "#0b132b"  // Customize the edge width
-				},
-			};
+			if (nodeCategory === 'Idea') {
+				const newEdge: Edge = {
+					id: `e${parentId}-IDEA_#${id}`,
+					source: parentId,
+					target: `IDEA_#${id}`,
+					style: {
+						stroke: "#0b132b"  // Customize the edge width
+					},
+				};
 
-			set({
-				edges: get().edges.concat(newEdge),
-			});
+				set({
+					edges: get().edges.concat(newEdge),
+				});
+			}
+			else if (nodeCategory === 'Context') {
+				const newEdge: Edge = {
+					id: `e${parentId}-CONTEXT_#${id}`,
+					source: parentId,
+					target: `CONTEXT_#${id}`,
+					style: {
+						stroke: "#0b132b"  // Customize the edge width
+					},
+				};
+
+				set({
+					edges: get().edges.concat(newEdge),
+				});
+			}
+			else {
+				const newEdge: Edge = {
+					id: `e${parentId}-CONTENT_#${id}`,
+					source: parentId,
+					target: `CONTENT_#${id}`,
+					style: {
+						stroke: "#0b132b"  // Customize the edge width
+					},
+				};
+
+				set({
+					edges: get().edges.concat(newEdge),
+				});
+			}
 		}
 	},
 }));
