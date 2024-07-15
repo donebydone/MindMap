@@ -15,32 +15,6 @@ const NodePalette: React.FC = () => {
     const [inputValue, setInputValue] = useState<string>('');
 
     const onDragStart = (event: DragEvent<HTMLDivElement>, nodeType: string, commandName: string, CommandType: string) => {
-        console.log(CommandType);
-
-        if (CommandType === "Node type") {
-            message.error({
-                content: "Select Command Type"
-            });
-            event.preventDefault(); // Prevent the drag event if CommandType is invalid
-            return;
-        }
-
-        if (CommandType === "Edit Node") {
-            message.error({
-                content: "Select Command Type"
-            });
-            event.preventDefault(); // Prevent the drag event if CommandType is invalid
-            return;
-        }
-
-        if (CommandType === "") {
-            message.error({
-                content: "Select Command Type"
-            });
-            event.preventDefault(); // Prevent the drag event if CommandType is invalid
-            return;
-        }
-
         const data = JSON.stringify({
             type: nodeType,
             commandName: commandName,
@@ -72,7 +46,7 @@ const NodePalette: React.FC = () => {
     }, []);
 
     return (
-        <div className="p-[15px] border-[1px] border-solid border-black bg-white flex flex-col gap-[15px] overflow-scroll max-h-[180px]">
+        <div className="p-[15px] border-[1px] border-solid border-black bg-white flex flex-col gap-[15px] overflow-scroll max-h-[300px]">
             {storedData.map((item, index) => (
                 <div
                     key={index}

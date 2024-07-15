@@ -6,8 +6,9 @@ export interface DataState {
 	version: string;
 	map: MapState;
 	config?: Config;
-	configuration: Config;
+	configuration: Configuration;
 	projectName: string;
+	requestContent: string
 }
 
 export interface ExportedDataState {
@@ -16,6 +17,44 @@ export interface ExportedDataState {
 	map: MapState;
 	config?: Config;
 }
+
+export interface Configuration {
+	openAIContent: string;
+	defaultAssistantContent: string;
+	defaultThreadIDContent: string;
+	commands: Commands[]
+}
+
+export interface checkState {
+	context: boolean;
+	content: boolean;
+	idea: boolean
+}
+
+export interface Commands {
+	commandName: string;
+	commandShortcut: string;
+	assistantId: string;
+	threadId: string;
+	commands: string;
+	select: string;
+	brothers: checkState;
+	parent: checkState;
+	all: checkState;
+	commandKey: string;
+}
+
+export interface ReturnCommand {
+	commandName: string;
+	commandShortcut: string;
+	assistantId: string;
+	threadId: string;
+	commands: string;
+	select: string;
+	ideas: string[];
+	context: string[];
+	content: string[];
+};
 
 export interface ImportedDataState {
 	type?: string;
@@ -30,7 +69,7 @@ export interface MapState extends ReactFlowJsonObject {
 	viewport: ViewportState;
 }
 
-interface NodeElement {
+export interface NodeElement {
 	width: number;
 	height: number;
 	id: string;
@@ -48,14 +87,14 @@ interface NodeElement {
 	};
 }
 
-interface EdgeElement {
+export interface EdgeElement {
 	id: string;
 	source: string;
 	target: string;
 	style: any;
 }
 
-interface ViewportState {
+export interface ViewportState {
 	x: number;
 	y: number;
 	zoom: number;

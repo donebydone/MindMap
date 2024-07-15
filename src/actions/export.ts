@@ -5,13 +5,16 @@ import { restoreProject, readFullContentArray } from '@/utils/storage';
 export const actionSaveFileToDisk = async () => {
 	const data = readFullContentArray();
 
-	await saveAsJSON('New Freemind', data[0].version, data[0].map, data[0].config, 'mm');
+	await saveAsJSON(data[0].projectName, data[0].version, data[0].map, data[0].config, 'mm');
 };
 
 export const actionSaveProjectFileToDisk = async () => {
 	const data = readFullContentArray();
 
-	await saveProjectAsJSON('New Project', data[0].version, data[0].map, data[0].config, data[0].configuration, data[0].projectName, 'json');
+	console.log(data);
+
+
+	await saveProjectAsJSON(data[0].projectName, data[0].version, data[0].map, data[0].config, data[0].configuration, data[0].projectName, 'json');
 };
 
 export const actionLoadFileFromDisk = async () => {

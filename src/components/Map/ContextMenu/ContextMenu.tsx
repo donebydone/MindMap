@@ -53,7 +53,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
     return (
         <ul
             className="context-menu"
-            style={{ top: position.y - 170, left: position.x - 45 }}
+            style={{ top: position.y + 10, left: position.x + 10 }}
             onClick={onClose}
         >
             <li onClick={onAddIdea}>Add empty Idea</li>

@@ -2,7 +2,8 @@ import { ReactFlowJsonObject } from 'reactflow';
 import { loadFromBlob, normalizeFile } from './blob';
 import { EXPORT_DATA_TYPES, MIME_TYPES } from './constants/export';
 import { fileOpen, fileSave } from './filesystem';
-import { Config, ExportedDataState, ImportedDataState, MapState } from './types';
+import { Config, Configuration, ExportedDataState, ImportedDataState, MapState } from './types';
+import { useState } from 'react';
 
 export const serializeAsJSON = (map: MapState, version: string, config: Config | undefined): string => {
 	const data: ExportedDataState = {
@@ -27,7 +28,7 @@ export const saveAsJSON = async (fileName: string, version: string, map: MapStat
 	URL.revokeObjectURL(url);
 };
 
-export const saveProjectAsJSON = async (fileName: string, version: string, map: MapState, config: Config | undefined, configuration: Config | undefined, projectName: string, extension: string): Promise<void> => {
+export const saveProjectAsJSON = async (fileName: string, version: string, map: MapState, config: Config | undefined, configuration: Configuration | undefined, projectName: string, extension: string): Promise<void> => {
 	const json = JSON.stringify({ version, map, config, projectName, configuration });
 	const blob = new Blob([json], { type: 'application/json' });
 	const url = URL.createObjectURL(blob);

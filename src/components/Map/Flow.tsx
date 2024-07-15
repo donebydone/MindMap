@@ -60,8 +60,6 @@ function Flow() {
 		viewport,
 		onNodesChange,
 		onEdgesChange,
-		onConnectStart,
-		onConnectEnd,
 		setReactFlowWrapper,
 		onInit,
 		addNode,
@@ -88,6 +86,22 @@ function Flow() {
 		};
 	}, []);
 
+	useEffect(() => {
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (event.key === 'Delete' && selectedNode) {
+				removeElement(selectedNode.id);
+				setShowMenu(false);
+				setSelectedNode(null);
+			}
+		};
+
+		window.addEventListener('keydown', handleKeyDown);
+
+		return () => {
+			window.removeEventListener('keydown', handleKeyDown);
+		};
+	}, [selectedNode, removeElement]);
+
 	const onDragOver = (event: DragEvent) => {
 		event.preventDefault();
 		event.dataTransfer.dropEffect = 'move';
@@ -101,6 +115,30 @@ function Flow() {
 		const { top, left } = reactFlowWrapper.current.getBoundingClientRect();
 		const data = JSON.parse(event.dataTransfer.getData('application/reactflow'));
 
+		if (data.CommandType === "Node type") {
+			message.error({
+				content: "Select Command Type"
+			});
+			event.preventDefault(); // Prevent the drag event if CommandType is invalid
+			return;
+		}
+
+		if (data.CommandType === "Edit Node") {
+			message.error({
+				content: "Select Command Type"
+			});
+			event.preventDefault(); // Prevent the drag event if CommandType is invalid
+			return;
+		}
+
+		if (data.CommandType === "") {
+			message.error({
+				content: "Select Command Type"
+			});
+			event.preventDefault(); // Prevent the drag event if CommandType is invalid
+			return;
+		}
+
 		const position = {
 			x: event.clientX - left,
 			y: event.clientY - top,
@@ -109,8 +147,6 @@ function Flow() {
 		if (typeof data.type === 'undefined' || !data.type) {
 			return;
 		}
-
-		console.log(data);
 
 		addNode(data.type, position, data.commandName, data.CommandType);
 	};
@@ -122,7 +158,8 @@ function Flow() {
 		setShowMenu(true);
 	};
 
-	const onNodeClick = () => {
+	const onNodeClick = (_: MouseEvent, node: Node) => {
+		setSelectedNode(node);
 		setShowMenu(false);
 	};
 
@@ -160,12 +197,14 @@ function Flow() {
 		if (selectedNode) {
 			removeElement(selectedNode.id);
 			setShowMenu(false);
+			setSelectedNode(null);
 		}
 	};
 
 	const onWrapperClick = (event: MouseEvent) => {
 		if ((event.target as HTMLElement).classList.contains('react-flow__pane')) {
 			setShowMenu(false);
+			setSelectedNode(null);
 		}
 	};
 
@@ -205,7 +244,7 @@ function Flow() {
 
 	return (
 		<>
-			<div className="absolute left-30 top-[150px] w-[280px] z-10">
+			<div className="absolute left-30 top-[250px] w-[280px] z-10">
 				<div className="border-[1px] border-[solid] border-black h-[40px] w-full relative flex justify-center items-center bg-white">
 					<h1>Command Bar</h1>
 					<div className="absolute right-0 top-0 w-[75px] h-full flex justify-between items-center px-[15px]">

@@ -16,7 +16,7 @@ export default function RequestInstruction() {
         const storedRequest = getRequest();
         if (storedRequest) {
             if (storedRequest[0].configuration) {
-                setRequest(storedRequest[0].configuration.requestContent);
+                setRequest(storedRequest[0].requestContent);
             }
             else {
                 setRequest('');
