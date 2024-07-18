@@ -130,8 +130,8 @@ const useMapStore = createWithEqualityFn<RFState>((set, get) => ({
 			nodes: data.nodes,
 			edges: data.edges,
 			viewport: data.viewport,
+			requestContent: "",
 			configuration: {
-				requestContent: "",
 				openAIContent: "",
 				defaultAssistantContent: "",
 				defaultThreadIDContent: "",

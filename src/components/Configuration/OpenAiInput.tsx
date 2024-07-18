@@ -1,5 +1,3 @@
-// components/Configuration/OpenAiInput.tsx
-
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -9,14 +7,6 @@ import { createNewCommand, getRequest, saveCommandReorder, saveDefaultAssistant,
 import { Reorder } from 'framer-motion';
 import { Commands, DataState } from '@/utils/types';
 
-interface StoredRequest {
-    configuration: {
-        openAIContent: string;
-        defaultAssistantContent: string;
-        defaultThreadIDContent: string;
-        commands?: Commands[];
-    };
-}
 
 export default function OpenAIInput() {
     const [components, setComponents] = useState<Commands[]>([]);
